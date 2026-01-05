@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLinker — Discover Biomarker Connections</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app">
+        <!-- Top Navigation Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="#" class="brand" onclick="switchView('home'); return false;">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 32 32" fill="none">
+                            <circle cx="16" cy="16" r="4" fill="currentColor"/>
+                            <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+                            <circle cx="16" cy="4" r="2" fill="currentColor"/>
+                            <circle cx="16" cy="28" r="2" fill="currentColor"/>
+                            <circle cx="4" cy="16" r="2" fill="currentColor"/>
+                            <circle cx="28" cy="16" r="2" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <span>BioLinker</span>
+                </a>
+            </div>
+            
+            <nav class="topbar-nav">
+                <a href="#" class="nav-link active" data-view="home">Home</a>
+                <a href="#" class="nav-link" data-view="explore">Explore</a>
+                <a href="#" class="nav-link" data-view="search">Search</a>
+                <a href="#" class="nav-link" data-view="network">Network</a>
+            </nav>
+            
+            <div class="topbar-right">
+                <div class="connection-status" id="connection-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Home View -->
+            <section id="home-view" class="view active">
+                <div class="hero">
+                    <div class="hero-content">
+                        <p class="hero-eyebrow">Biomarker Discovery Platform</p>
+                        <h1 class="hero-title">
+                            Uncover the hidden connections in 
+                            <span class="highlight">biomedical research</span>
+                        </h1>
+                        <p class="hero-description">
+                            Search millions of PubMed articles, extract biomarker-disease relationships with AI, 
+                            and visualize the knowledge graph of biological discoveries.
+                        </p>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg" onclick="switchView('search')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                                Start Searching
+                            </button>
+                            <button class="btn btn-ghost btn-lg" onclick="switchView('explore')">
+                                Explore Data
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-visual">
+                        <div class="dna-helix">
+                            <div class="strand strand-1"></div>
+                            <div class="strand strand-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <h2 class="section-title">Your Knowledge Base</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card" style="--accent: var(--blue);">
+                            <div class="stat-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="stat-articles">0</span>
+                                <span class="stat-label">Articles</span>
+                            </div>
+                            <div class="stat-bg"></div>
+                        </div>
+                        
+                        <div class="stat-card" style="--accent: var(--emerald);">
+                            <div class="stat-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                    <path d="M22 4L12 14.01l-3-3"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="stat-processed">0</span>
+                                <span class="stat-label">Processed</span>
+                            </div>
+                            <div class="stat-bg"></div>
+                        </div>
+                        
+                        <div class="stat-card" style="--accent: var(--violet);">
+                            <div class="stat-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                    <path d="M2 17l10 5 10-5"/>
+                                    <path d="M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="stat-markers">0</span>
+                                <span class="stat-label">Biomarkers</span>
+                            </div>
+                            <div class="stat-bg"></div>
+                        </div>
+                        
+                        <div class="stat-card" style="--accent: var(--rose);">
+                            <div class="stat-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="stat-diseases">0</span>
+                                <span class="stat-label">Diseases</span>
+                            </div>
+                            <div class="stat-bg"></div>
+                        </div>
+                        
+                        <div class="stat-card stat-card-wide" style="--accent: var(--amber);">
+                            <div class="stat-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                                    <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number" id="stat-associations">0</span>
+                                <span class="stat-label">Discovered Associations</span>
+                            </div>
+                            <div class="stat-bg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="actions-section">
+                    <h2 class="section-title">Quick Actions</h2>
+                    <div class="actions-grid">
+                        <button class="action-card" onclick="switchView('search')">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                            </div>
+                            <div class="action-content">
+                                <h3>Search PubMed</h3>
+                                <p>Find biomarker research from millions of articles</p>
+                            </div>
+                            <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="action-card" onclick="processArticles()">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                                </svg>
+                            </div>
+                            <div class="action-content">
+                                <h3>Process Articles</h3>
+                                <p>Extract biomarkers using AI analysis</p>
+                            </div>
+                            <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="action-card" onclick="switchView('network')">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="5" r="3"/>
+                                    <circle cx="5" cy="19" r="3"/>
+                                    <circle cx="19" cy="19" r="3"/>
+                                    <path d="M12 8v4m-5.2 3.8l3.6-3.6m7.2 3.6l-3.6-3.6"/>
+                                </svg>
+                            </div>
+                            <div class="action-content">
+                                <h3>View Network</h3>
+                                <p>Visualize biomarker-disease relationships</p>
+                            </div>
+                            <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                        
+                        <button class="action-card" onclick="openEnrichModal()">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                                    <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/>
+                                </svg>
+                            </div>
+                            <div class="action-content">
+                                <h3>Gene Lookup</h3>
+                                <p>Get HGNC & UniProt information</p>
+                            </div>
+                            <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Explore View -->
+            <section id="explore-view" class="view">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Explore Your Data</h1>
+                        <p class="page-subtitle">Browse biomarkers, diseases, and articles in your knowledge base</p>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="markers">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                        </svg>
+                        Biomarkers
+                    </button>
+                    <button class="tab" data-tab="diseases">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z"/>
+                        </svg>
+                        Diseases
+                    </button>
+                    <button class="tab" data-tab="articles">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                        </svg>
+                        Articles
+                    </button>
+                </div>
+
+                <div class="search-bar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" id="explore-search" placeholder="Search markers, diseases, or articles...">
+                </div>
+
+                <div class="tab-content active" id="markers-content">
+                    <div id="markers-list" class="data-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                    <path d="M2 17l10 5 10-5"/>
+                                    <path d="M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                            <h3>No biomarkers yet</h3>
+                            <p>Search PubMed and process articles to discover biomarkers</p>
+                            <button class="btn btn-primary" onclick="switchView('search')">Start Searching</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="diseases-content">
+                    <div id="diseases-list" class="data-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z"/>
+                                </svg>
+                            </div>
+                            <h3>No diseases yet</h3>
+                            <p>Process articles to extract disease associations</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="articles-content">
+                    <div class="articles-toolbar">
+                        <label class="toggle">
+                            <input type="checkbox" id="processed-only">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Show processed only</span>
+                        </label>
+                    </div>
+                    <div id="articles-list" class="articles-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                    <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                                </svg>
+                            </div>
+                            <h3>No articles yet</h3>
+                            <p>Search PubMed to import articles</p>
+                            <button class="btn btn-primary" onclick="switchView('search')">Search PubMed</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search View -->
+            <section id="search-view" class="view">
+                <div class="page-header centered">
+                    <h1 class="page-title">Search PubMed</h1>
+                    <p class="page-subtitle">Find biomarker research from millions of scientific articles</p>
+                </div>
+
+                <div class="search-hero">
+                    <div class="search-input-wrapper">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <input type="text" id="search-query" placeholder="e.g., BRCA1 breast cancer biomarker">
+                        <button class="search-submit" onclick="searchPubMed()">
+                            Search
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="search-suggestions">
+                        <span>Try:</span>
+                        <button onclick="setSearchQuery('biomarker cancer diagnosis')">cancer diagnosis</button>
+                        <button onclick="setSearchQuery('miRNA cardiovascular disease')">miRNA cardiovascular</button>
+                        <button onclick="setSearchQuery('Alzheimer protein marker')">Alzheimer proteins</button>
+                        <button onclick="setSearchQuery('diabetes gene expression')">diabetes genes</button>
+                    </div>
+                </div>
+
+                <div class="search-options">
+                    <div class="option-group">
+                        <label>Maximum Results</label>
+                        <div class="select-wrapper">
+                            <select id="max-results">
+                                <option value="20">20 articles</option>
+                                <option value="50">50 articles</option>
+                                <option value="100" selected>100 articles</option>
+                                <option value="500">500 articles</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label>Focus Disease</label>
+                        <input type="text" id="disease-filter" placeholder="Any disease">
+                    </div>
+                    
+                    <div class="option-group">
+                        <label>Marker Type</label>
+                        <div class="select-wrapper">
+                            <select id="marker-type-filter">
+                                <option value="">All types</option>
+                                <option value="gene">Genes</option>
+                                <option value="protein">Proteins</option>
+                                <option value="mirna">miRNAs</option>
+                                <option value="metabolite">Metabolites</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-results" class="search-results">
+                    <div class="search-placeholder">
+                        <div class="placeholder-visual">
+                            <svg viewBox="0 0 120 120" fill="none">
+                                <circle cx="60" cy="60" r="40" stroke="currentColor" stroke-width="2" stroke-dasharray="8 8" opacity="0.3"/>
+                                <circle cx="60" cy="60" r="20" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+                                <circle cx="60" cy="60" r="4" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h3>Ready to discover</h3>
+                        <p>Enter your search query above to find biomarker research</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Network View -->
+            <section id="network-view" class="view">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Knowledge Network</h1>
+                        <p class="page-subtitle">Visualize connections between biomarkers and diseases</p>
+                    </div>
+                </div>
+
+                <div class="network-toolbar">
+                    <div class="network-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <input type="text" id="network-search" placeholder="Enter marker or disease name...">
+                    </div>
+                    <div class="network-type-toggle">
+                        <button class="type-btn active" data-type="marker">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            </svg>
+                            Marker
+                        </button>
+                        <button class="type-btn" data-type="disease">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0016.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 002 8.5c0 2.3 1.5 4.05 3 5.5l7 7 7-7z"/>
+                            </svg>
+                            Disease
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadNetwork()">
+                        Visualize
+                    </button>
+                </div>
+
+                <div id="network-container" class="network-canvas">
+                    <div class="network-placeholder">
+                        <div class="placeholder-nodes">
+                            <div class="node node-1"></div>
+                            <div class="node node-2"></div>
+                            <div class="node node-3"></div>
+                            <div class="node node-4"></div>
+                            <div class="node node-center"></div>
+                            <svg class="placeholder-lines" viewBox="0 0 200 200">
+                                <line x1="100" y1="100" x2="30" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                                <line x1="100" y1="100" x2="170" y2="50" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                                <line x1="100" y1="100" x2="40" y2="160" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                                <line x1="100" y1="100" x2="160" y2="150" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                            </svg>
+                        </div>
+                        <h3>Explore Connections</h3>
+                        <p>Search for a biomarker or disease to visualize its relationship network</p>
+                    </div>
+                </div>
+
+                <div class="network-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: var(--violet);"></span>
+                        <span>Biomarkers</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: var(--rose);"></span>
+                        <span>Diseases</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-line"></span>
+                        <span>Association</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeAuthModal()"></div>
+        <div class="modal-content" style="max-width: 420px;">
+            <button class="modal-close" onclick="closeAuthModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <div class="modal-header">
+                <h2 id="auth-title">Sign In</h2>
+                <p id="auth-subtitle">Welcome back to BioLinker</p>
+            </div>
+            <div class="modal-body">
+                <form id="auth-form" onsubmit="handleAuth(event)">
+                    <div class="form-group" id="name-group" style="display: none;">
+                        <label>Full Name</label>
+                        <input type="text" id="auth-name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="auth-email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="auth-password" placeholder="••••••••" required minlength="8">
+                    </div>
+                    <div class="form-group" id="org-group" style="display: none;">
+                        <label>Organization (optional)</label>
+                        <input type="text" id="auth-org" placeholder="Your institution">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <span id="auth-btn-text">Sign In</span>
+                    </button>
+                </form>
+                <div style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
+                    <span id="auth-switch-text">Don't have an account?</span>
+                    <button onclick="toggleAuthMode()" style="background: none; border: none; color: var(--teal); cursor: pointer; font-weight: 500;">
+                        <span id="auth-switch-btn">Sign Up</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gene Lookup Modal -->
+    <div id="enrich-modal" class="modal">
+        <div class="modal-backdrop" onclick="closeEnrichModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEnrichModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <div class="modal-header">
+                <h2>Gene & Protein Lookup</h2>
+                <p>Get detailed information from HGNC and UniProt databases</p>
+            </div>
+            <div class="modal-body">
+                <div class="lookup-form">
+                    <div class="lookup-input">
+                        <input type="text" id="enrich-symbol" placeholder="Enter gene symbol (e.g., BRCA1, TP53)">
+                        <button class="btn btn-primary" onclick="enrichMarker()">
+                            Look Up
+                        </button>
+                    </div>
+                    <div class="lookup-examples">
+                        <span>Examples:</span>
+                        <button onclick="setEnrichSymbol('BRCA1')">BRCA1</button>
+                        <button onclick="setEnrichSymbol('TP53')">TP53</button>
+                        <button onclick="setEnrichSymbol('EGFR')">EGFR</button>
+                        <button onclick="setEnrichSymbol('IL6')">IL6</button>
+                    </div>
+                </div>
+                <div id="enrich-results" class="lookup-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioLinker — AI-Powered Biomarker Discovery</title>
+    <meta name="description" content="Discover biomarker-disease relationships from millions of research papers using AI. Accelerate your research with automated extraction and knowledge graphs.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #0c0a09;
+            --bg-elevated: #1c1917;
+            --bg-surface: #292524;
+            --text-primary: #fafaf9;
+            --text-secondary: #a8a29e;
+            --text-muted: #78716c;
+            --teal: #2dd4bf;
+            --blue: #38bdf8;
+            --violet: #a78bfa;
+            --rose: #fb7185;
+            --emerald: #34d399;
+            --amber: #fbbf24;
+            --border: rgba(255,255,255,0.1);
+            --gradient: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+            --font-display: 'Fraunces', Georgia, serif;
+            --font-body: 'Inter', sans-serif;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Ambient Background */
+        .ambient {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.4;
+            animation: float 25s ease-in-out infinite;
+        }
+        
+        .orb-1 { width: 800px; height: 800px; background: var(--teal); top: -300px; right: -200px; }
+        .orb-2 { width: 600px; height: 600px; background: var(--violet); bottom: -200px; left: -200px; animation-delay: -10s; }
+        .orb-3 { width: 500px; height: 500px; background: var(--rose); top: 50%; left: 40%; opacity: 0.2; animation-delay: -20s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(40px, -40px) scale(1.05); }
+            66% { transform: translate(-30px, 30px) scale(0.95); }
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px 0;
+            background: rgba(12, 10, 9, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            color: var(--teal);
+        }
+        
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: var(--text-primary); }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--bg-base);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(45, 212, 191, 0.3);
+        }
+        
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-ghost:hover {
+            background: var(--bg-surface);
+        }
+        
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            text-align: center;
+            margin: 0 auto;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(45, 212, 191, 0.1);
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--teal);
+            margin-bottom: 32px;
+        }
+        
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--teal);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+        }
+        
+        .hero h1 .gradient {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 500;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            justify-content: center;
+            margin-top: 80px;
+            padding-top: 48px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--teal);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Features */
+        .features {
+            padding: 120px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+        
+        .section-header h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+        
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        .feature-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .feature-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .feature-icon.teal { background: rgba(45, 212, 191, 0.1); color: var(--teal); }
+        .feature-icon.violet { background: rgba(167, 139, 250, 0.1); color: var(--violet); }
+        .feature-icon.rose { background: rgba(251, 113, 133, 0.1); color: var(--rose); }
+        .feature-icon.blue { background: rgba(56, 189, 248, 0.1); color: var(--blue); }
+        .feature-icon.emerald { background: rgba(52, 211, 153, 0.1); color: var(--emerald); }
+        .feature-icon.amber { background: rgba(251, 191, 36, 0.1); color: var(--amber); }
+        
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 120px 0;
+            background: var(--bg-elevated);
+        }
+        
+        .steps {
+            display: flex;
+            gap: 32px;
+            margin-top: 64px;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 40px;
+            right: -16px;
+            width: calc(100% - 80px);
+            height: 2px;
+            background: linear-gradient(90deg, var(--teal), transparent);
+            transform: translateX(50%);
+        }
+        
+        .step-number {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--bg-base);
+            margin: 0 auto 24px;
+        }
+        
+        .step h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .step p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* Waitlist */
+        .waitlist {
+            padding: 120px 0;
+        }
+        
+        .waitlist-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 64px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .waitlist-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: var(--teal);
+            opacity: 0.05;
+            border-radius: 50%;
+            filter: blur(100px);
+        }
+        
+        .waitlist-card h2 {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        
+        .waitlist-card > p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .waitlist-form {
+            display: flex;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .waitlist-form input {
+            flex: 1;
+            padding: 16px 20px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .waitlist-form input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+        }
+        
+        .waitlist-form input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .waitlist-count {
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            position: relative;
+        }
+        
+        .waitlist-count strong {
+            color: var(--teal);
+        }
+        
+        /* Footer */
+        .footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+        }
+        
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover { color: var(--text-primary); }
+        
+        /* Success message */
+        .success-message {
+            display: none;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--emerald);
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: var(--emerald);
+            margin-top: 16px;
+        }
+        
+        .success-message.show { display: block; }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { flex-direction: column; gap: 48px; }
+            .step:not(:last-child)::after { display: none; }
+            .hero-stats { flex-wrap: wrap; gap: 32px; }
+        }
+        
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .waitlist-form { flex-direction: column; }
+            .waitlist-card { padding: 40px 24px; }
+            .hero h1 { font-size: 2rem; }
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="#" class="logo">
+                <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="4" fill="currentColor"/>
+                    <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+                    <circle cx="16" cy="4" r="2" fill="currentColor"/>
+                    <circle cx="16" cy="28" r="2" fill="currentColor"/>
+                    <circle cx="4" cy="16" r="2" fill="currentColor"/>
+                    <circle cx="28" cy="16" r="2" fill="currentColor"/>
+                </svg>
+                <span class="logo-text">BioLinker</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="frontend/index.html" class="btn btn-ghost">Sign In</a>
+                <a href="#waitlist" class="btn btn-primary">Get Early Access</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">Now in Early Access</div>
+                <h1>
+                    Discover biomarker connections with <span class="gradient">AI-powered research</span>
+                </h1>
+                <p>
+                    Automatically extract biomarker-disease relationships from millions of PubMed articles. 
+                    Build knowledge graphs. Accelerate your research.
+                </p>
+                <div class="hero-cta">
+                    <a href="#waitlist" class="btn btn-primary">
+                        Join the Waitlist
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="#how-it-works" class="btn btn-ghost">See How It Works</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-value">36M+</div>
+                        <div class="stat-label">PubMed Articles</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">10x</div>
+                        <div class="stat-label">Faster Research</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">AI</div>
+                        <div class="stat-label">Powered Extraction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Everything you need for biomarker discovery</h2>
+                <p>From literature search to knowledge graphs, all in one platform</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon teal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                    </div>
+                    <h3>Smart PubMed Search</h3>
+                    <p>Search millions of articles with intelligent query building. Filter by disease, marker type, and publication date.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon violet">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4"/>
+                        </svg>
+                    </div>
+                    <h3>AI Extraction</h3>
+                    <p>Automatically extract biomarkers, diseases, and their relationships from paper abstracts using advanced LLMs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon rose">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/>
+                            <path d="M12 8v4m-5.2 3.8l3.6-3.6m7.2 3.6l-3.6-3.6"/>
+                        </svg>
+                    </div>
+                    <h3>Knowledge Graphs</h3>
+                    <p>Visualize biomarker-disease networks. Discover hidden connections across thousands of studies.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                        </svg>
+                    </div>
+                    <h3>Data Enrichment</h3>
+                    <p>Automatically enrich markers with HGNC gene symbols, UniProt IDs, chromosomal locations, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon emerald">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>
+                        </svg>
+                    </div>
+                    <h3>Export & Reports</h3>
+                    <p>Export your findings to CSV, generate PDF reports, or access via API for integration with your workflow.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon amber">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/>
+                        </svg>
+                    </div>
+                    <h3>Team Collaboration</h3>
+                    <p>Share projects, annotate findings, and collaborate with your research team in real-time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How it works</h2>
+                <p>From search to insights in three simple steps</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Search PubMed</h3>
+                    <p>Enter your research query and we'll fetch relevant articles from PubMed's database of 36+ million papers.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>AI Extraction</h3>
+                    <p>Our AI analyzes each abstract to extract biomarkers, diseases, and their relationships with statistical evidence.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Explore & Export</h3>
+                    <p>Browse your knowledge graph, discover connections, and export findings for your research or publication.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Waitlist -->
+    <section class="waitlist" id="waitlist">
+        <div class="container">
+            <div class="waitlist-card">
+                <h2>Get early access</h2>
+                <p>Join researchers from leading institutions already on our waitlist</p>
+                <form class="waitlist-form" id="waitlist-form">
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-primary">Join Waitlist</button>
+                </form>
+                <div class="success-message" id="success-message">
+                    🎉 You're on the list! We'll be in touch soon.
+                </div>
+                <div class="waitlist-count">
+                    <strong id="waitlist-count">0</strong> researchers already on the waitlist
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-text">© 2024 BioLinker. Accelerating biomarker discovery.</div>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        // Load waitlist count
+        async function loadWaitlistCount() {
+            try {
+                const res = await fetch(`${API_BASE}/auth/waitlist/count`);
+                const data = await res.json();
+                document.getElementById('waitlist-count').textContent = data.count || 0;
+            } catch (e) {
+                console.log('Could not load waitlist count');
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/waitlist`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                
+                if (res.ok) {
+                    document.getElementById('success-message').classList.add('show');
+                    e.target.reset();
+                    loadWaitlistCount();
+                } else {
+                    const data = await res.json();
+                    alert(data.detail || 'Something went wrong');
+                }
+            } catch (err) {
+                alert('Could not connect to server');
+            }
+        });
+        
+        // Load count on page load
+        loadWaitlistCount();
+    </script>
+</body>
+</html>
+
